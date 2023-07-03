@@ -1,13 +1,14 @@
 import argparse
 import os
+
 import requests
 from tqdm import tqdm
 
 
 def main_download():
     parser = argparse.ArgumentParser(
-        prog='des-archive-access-download',
-        description='download the metadata for the DES archive at FNAL',
+        prog="des-archive-access-download",
+        description="download the metadata for the DES archive at FNAL",
     )
     parser.parse_args()
 
@@ -22,16 +23,16 @@ def main_download():
             "desdm-file-db-23-05-03-13-33/desdm-test.db"
         )
         response = requests.get(url, stream=True)
-        total_size_in_bytes = int(response.headers.get('content-length', 0))
+        total_size_in_bytes = int(response.headers.get("content-length", 0))
         block_size = 1024
         with tqdm(
             total=total_size_in_bytes,
-            unit='iB',
+            unit="iB",
             unit_scale=True,
             ncols=80,
             desc="downloading DB",
         ) as progress_bar:
-            with open('test.dat', 'wb') as file:
+            with open("test.dat", "wb") as file:
                 for data in response.iter_content(block_size):
                     progress_bar.update(len(data))
                     file.write(data)

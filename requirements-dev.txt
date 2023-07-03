@@ -2,6 +2,6 @@ black
 flake8
 pip
 pytest
+python-build
 setuptools
 setuptools_scm>=7
-python-build

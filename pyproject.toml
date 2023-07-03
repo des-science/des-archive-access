@@ -1,0 +1,35 @@
+[build-system]
+requires = [
+    "setuptools>=45",
+    "setuptools_scm>=7",
+    "tomli>=1.0.0; python_version < '3.11'",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "des-archive-access"
+authors = [
+    {name = "Matthew R. Becker", email = "mrbecker@anl.gov"},
+]
+description = "access the DES archive at FNAL"
+dynamic = ["version"]
+dependencies = [
+    "requests",
+    "pyyaml"
+]
+license = {file = "LICENSE"}
+readme = "README.md"
+
+
+[project.urls]
+home = "https://github.com/des-science/des-archive-access"
+
+[tool.setuptools_scm]
+write_to = "des_archive_access/_version.py"
+write_to_template = "__version__ = '{version}'\n"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"

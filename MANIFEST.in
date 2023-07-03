@@ -1,0 +1,3 @@
+include des_archive_access/_version.py
+include requirements.txt
+include LICENSE

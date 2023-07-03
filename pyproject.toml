@@ -20,6 +20,8 @@ dependencies = [
 license = {file = "LICENSE"}
 readme = "README.md"
 
+[project.scripts]
+des-archive-access-download = "des_archive_access.cli:main_download"
 
 [project.urls]
 home = "https://github.com/des-science/des-archive-access"

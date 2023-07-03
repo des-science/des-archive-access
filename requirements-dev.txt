@@ -4,3 +4,4 @@ pip
 pytest
 setuptools
 setuptools_scm>=7
+python-build

@@ -6,6 +6,21 @@ import requests
 from tqdm import tqdm
 
 
+def get_des_archive_access_dir():
+    """Get the current DES_ARCHIVE_ACCESS_DIR."""
+    return os.environ.get(
+        "DES_ARCHIVE_ACCESS_DIR",
+        os.path.expanduser("~/.des_archive_access"),
+    )
+
+
+def make_des_archive_access_dir():
+    """Make the DES_ARCHIVE_ACCESS_DIR and set permissions to 700."""
+    daad = get_des_archive_access_dir()
+    os.makedirs(daad, exist_ok=True)
+    os.chmod(daad, 0o700)
+
+
 def main_download():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-download",
@@ -28,7 +43,7 @@ def main_download():
     )
     args = parser.parse_args()
 
-    mloc = os.path.expanduser("~/.des_archive_access/metadata.db")
+    mloc = os.path.join(get_des_archive_access_dir(), "metadata.db")
 
     if args.remove or args.force:
         try:
@@ -40,7 +55,7 @@ def main_download():
         sys.exit(0)
 
     if not os.path.exists(mloc) or args.force:
-        os.makedirs(os.path.dirname(mloc), exist_ok=True)
+        make_des_archive_access_dir()
         try:
             # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
             url = args.url or (

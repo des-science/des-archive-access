@@ -1,6 +1,10 @@
 import argparse
+import contextlib
+import getpass
 import os
+import subprocess
 import sys
+import tempfile
 
 import requests
 from tqdm import tqdm
@@ -85,3 +89,83 @@ def main_download():
                 pass
 
             raise e
+
+
+def _check_openssl_version():
+    res = subprocess.run(
+        "openssl version",
+        shell=True,
+        check=True,
+        capture_output=True,
+    )
+    version = res.stdout.decode("utf-8").split()[1]
+    assert version[0] == "3", (
+        "OpenSSL version needs to be at least version 3: found %s" % version
+    )
+    return version
+
+
+# https://stackoverflow.com/questions/6194499/pushd-through-os-system
+@contextlib.contextmanager
+def pushd(new_dir):
+    previous_dir = os.getcwd()
+    os.chdir(new_dir)
+    try:
+        yield
+    finally:
+        os.chdir(previous_dir)
+
+
+def main_process_cert():
+    parser = argparse.ArgumentParser(
+        prog="des-archive-access-process-cert",
+        description="process the CILogon certificate for DES archive access",
+    )
+    parser.add_argument(
+        "cert",
+        type=str,
+        help="certificate to process",
+        nargs="?",
+        default=None,
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="forcibly replace the current certificate and password",
+    )
+    parser.add_argument(
+        "--remove", action="store_true", help="remove existing certificate and password"
+    )
+    args = parser.parse_args()
+
+    cloc = os.path.join(get_des_archive_access_dir(), "cert.p12")
+    ploc = os.path.join(get_des_archive_access_dir(), "password_for_cert")
+
+    if args.remove or args.force:
+        try:
+            os.remove(cloc)
+        except Exception:
+            pass
+        try:
+            os.remove(ploc)
+        except Exception:
+            pass
+
+    if args.cert is not None and not os.path.exists(cloc):
+        _check_openssl_version()
+
+        with tempfile.TemporaryDirectory() as tmpdir, pushd(tmpdir):
+            subprocess.run(
+                "openssl pkcs12 -in %s -nodes -legacy > temp" % args.cert,
+                shell=True,
+                check=True,
+            )
+            subprocess.run(
+                "openssl pkcs12 -export -out %s -in temp" % cloc,
+                shell=True,
+                check=True,
+            )
+            pw = getpass.getpass()
+            with open(ploc, "w") as fp:
+                fp.write(pw)

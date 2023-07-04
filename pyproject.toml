@@ -22,6 +22,7 @@ readme = "README.md"
 
 [project.scripts]
 des-archive-access-download = "des_archive_access.cli:main_download"
+des-archive-access-process-cert = "des_archive_access.cli:main_process_cert"
 
 [project.urls]
 home = "https://github.com/des-science/des-archive-access"

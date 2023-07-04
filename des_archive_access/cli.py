@@ -78,7 +78,7 @@ def main_download():
                         file.write(data)
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
                 raise RuntimeError("Download failed!")
-        except Exception as e:
+        except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(mloc)
             except Exception:

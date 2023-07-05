@@ -25,6 +25,16 @@ def make_des_archive_access_dir():
     os.chmod(daad, 0o700)
 
 
+def get_des_archive_access_db():
+    return os.environ.get(
+        "DES_ARCHIVE_ACCESS_DB",
+        os.path.join(
+            os.path.expanduser("~/.des_archive_access"),
+            "metadata.db",
+        ),
+    )
+
+
 def main_download():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-download",
@@ -47,7 +57,7 @@ def main_download():
     )
     args = parser.parse_args()
 
-    mloc = os.path.join(get_des_archive_access_dir(), "metadata.db")
+    mloc = get_des_archive_access_db()
 
     if args.remove or args.force:
         try:
@@ -59,7 +69,11 @@ def main_download():
         sys.exit(0)
 
     if not os.path.exists(mloc) or args.force:
-        make_des_archive_access_dir()
+        if os.path.dirname(mloc) == os.path.expanduser("~/.des_archive_access"):
+            make_des_archive_access_dir()
+        else:
+            os.makedirs(os.path.dirname(mloc), exist_ok=True)
+
         try:
             # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
             url = args.url or (
@@ -152,7 +166,10 @@ def main_process_cert():
         except Exception:
             pass
 
-    if args.cert is not None and not os.path.exists(cloc):
+    if args.remove:
+        sys.exit(0)
+
+    if args.cert is not None and (not os.path.exists(cloc) or args.force):
         _check_openssl_version()
         make_des_archive_access_dir()
 

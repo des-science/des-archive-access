@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from des_archive_access.cli import get_des_archive_access_dir
+from des_archive_access.cli import get_des_archive_access_db
 
 
 def test_download_help():
@@ -15,14 +15,18 @@ def test_download_help():
 
 
 def test_download(tmpdir):
-    old_daad = get_des_archive_access_dir()
-    env_var_set = "DES_ARCHIVE_ACCESS_DIR" in os.environ
+    old_db = get_des_archive_access_db()
+    env_var_set = "DES_ARCHIVE_ACCESS_DB" in os.environ
 
     try:
-        os.environ["DES_ARCHIVE_ACCESS_DIR"] = os.path.join(tmpdir, "daad")
-        assert get_des_archive_access_dir() == os.path.join(tmpdir, "daad")
+        os.environ["DES_ARCHIVE_ACCESS_DB"] = os.path.join(
+            tmpdir, "dadd", "metadata.db"
+        )
+        assert get_des_archive_access_db() == os.path.join(
+            tmpdir, "dadd", "metadata.db"
+        )
 
-        mloc = os.path.join(get_des_archive_access_dir(), "metadata.db")
+        mloc = get_des_archive_access_db()
         res = subprocess.run(
             "des-archive-access-download "
             "--url "
@@ -62,6 +66,6 @@ def test_download(tmpdir):
         assert os.path.exists(mloc)
     finally:
         if env_var_set:
-            os.environ["DES_ARCHIVE_ACCESS_DIR"] == old_daad
+            os.environ["DES_ARCHIVE_ACCESS_DB"] == old_db
         else:
-            del os.environ["DES_ARCHIVE_ACCESS_DIR"]
+            del os.environ["DES_ARCHIVE_ACCESS_DB"]

@@ -44,7 +44,7 @@ def main_download():
         "--list",
         type=str,
         default=None,
-        help="download all file in a list",
+        help="download all files in a list",
     )
     parser.add_argument(
         "-p",

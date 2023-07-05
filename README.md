@@ -106,7 +106,19 @@ This functionality works in both the SQL shell and at the command line.
 You can use the `des-archive-access-download` command to download files from the archive.
 
 ```bash
+$ des-archive-access-download --help
+usage: des-archive-access-download [-h] [-l LIST] [-p PREFIX] [file]
 
+download files from the DES archive at FNAL
+
+positional arguments:
+  file                  file to download
+
+options:
+  -h, --help            show this help message and exit
+  -l LIST, --list LIST  download all file in a list
+  -p PREFIX, --prefix PREFIX
+                        HTTPS address of the archive
 ```
 
 You must set the `DESDATA` environment variable. Files will be downloaded to this location at the same relative path as the location in the archive.

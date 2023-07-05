@@ -14,16 +14,26 @@ In order to download files from thr archive, you need a CILogon certificate. Fol
 4. Follow the instructions to download a certificate.
 5. Reformat the certificate by executing `des-archive-access-process-cert /path/to/cert`. This command will ask you for your password and to set a new password. You can reuse the same password if you'd like or set no password. Hopefully we don't have to do this in the future.
 
-The password and certificate will be stored in the `~/.des_archive_access/` directory in your home area. **Make the sure the permissions on this directory are `700` via `chmod 700 ~/.des_archive_access/`.**
+The password and certificate will be stored in the `~/.des_archive_access/` directory in your home area. **Make the sure the permissions on this directory are `700` via `chmod 700 ~/.des_archive_access/`.** You can change this location by setting the environment variable `DES_ARCHIVE_ACCESS_DIR`.
+
+You need to export the certificate password via the DES_ARCHIVE_ACCESS_PASSWORD (which you can add to your `~/.bashrc` or similar):
+
+```bash
+export DES_ARCHIVE_ACCESS_PASSWORD=yourpassword
+```
 
 ## Usage
 
-Before you can query the file archive metadata, you need to download the metadata database (roughly 30GB!!!) via the `des-archive-access-download`
+### Downloading the Archive Metadata
+
+Before you can query the file archive metadata, you need to download the metadata database (roughly 30GB!!!) via the `des-archive-access-download-metadata`
 command. This command will put the data in your home area. If you'd like to specify a different path to the DB, set it via the environment variable `DES_ARCHIVE_ACCESS_DB` like this
 
 ```bash
 $ export DES_ARCHIVE_ACCESS_DB=/my/metadata.db
 ```
+
+### Querying the Archive Metadata
 
 Then you can use the `des-archive-access` command to interact with the metadata.
 
@@ -90,6 +100,16 @@ blah.fits
 ```
 
 This functionality works in both the SQL shell and at the command line.
+
+### Downloading Files from the Archive
+
+You can use the `des-archive-access-download` command to download files from the archive.
+
+```bash
+
+```
+
+You must set the `DESDATA` environment variable. Files will be downloaded to this location at the same relative path as the location in the archive.
 
 ## Differences between `des-archive-access` and `easyaccess`
 

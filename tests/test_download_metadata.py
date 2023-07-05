@@ -4,17 +4,17 @@ import subprocess
 from des_archive_access.dbfiles import get_des_archive_access_db
 
 
-def test_download_help():
+def test_download_metadata_help():
     res = subprocess.run(
-        "des-archive-access-download --help",
+        "des-archive-access-download-metadata --help",
         shell=True,
         check=True,
         capture_output=True,
     )
-    assert "usage: des-archive-access-download" in res.stdout.decode("utf-8")
+    assert "usage: des-archive-access-download-metadata" in res.stdout.decode("utf-8")
 
 
-def test_download(tmpdir):
+def test_download_metadata(tmpdir):
     old_db = get_des_archive_access_db()
     env_var_set = "DES_ARCHIVE_ACCESS_DB" in os.environ
 
@@ -28,7 +28,7 @@ def test_download(tmpdir):
 
         mloc = get_des_archive_access_db()
         res = subprocess.run(
-            "des-archive-access-download "
+            "des-archive-access-download-metadata "
             "--url "
             "https://black.readthedocs.io/en/stable/"
             "usage_and_configuration/the_basics.html",
@@ -40,7 +40,7 @@ def test_download(tmpdir):
         assert os.path.exists(mloc)
 
         res = subprocess.run(
-            "des-archive-access-download "
+            "des-archive-access-download-metadata "
             "--url "
             "https://black.readthedocs.io/en/stable/"
             "usage_and_configuration/the_basics.html",
@@ -53,7 +53,7 @@ def test_download(tmpdir):
         assert os.path.exists(mloc)
 
         res = subprocess.run(
-            "des-archive-access-download "
+            "des-archive-access-download-metadata "
             "--force "
             "--url "
             "https://black.readthedocs.io/en/stable/"

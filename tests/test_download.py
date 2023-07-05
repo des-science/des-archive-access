@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+from des_archive_access.cli import get_des_archive_access_db
+
 
 def test_download_help():
     res = subprocess.run(
@@ -12,9 +14,19 @@ def test_download_help():
     assert "usage: des-archive-access-download" in res.stdout.decode("utf-8")
 
 
-def test_download():
-    mloc = os.path.expanduser("~/.des_archive_access/metadata.db")
+def test_download(tmpdir):
+    old_db = get_des_archive_access_db()
+    env_var_set = "DES_ARCHIVE_ACCESS_DB" in os.environ
+
     try:
+        os.environ["DES_ARCHIVE_ACCESS_DB"] = os.path.join(
+            tmpdir, "dadd", "metadata.db"
+        )
+        assert get_des_archive_access_db() == os.path.join(
+            tmpdir, "dadd", "metadata.db"
+        )
+
+        mloc = get_des_archive_access_db()
         res = subprocess.run(
             "des-archive-access-download "
             "--url "
@@ -53,11 +65,7 @@ def test_download():
         assert "downloading DB" in res.stderr.decode("utf-8")
         assert os.path.exists(mloc)
     finally:
-        subprocess.run(
-            "des-archive-access-download --remove",
-            shell=True,
-            check=True,
-            capture_output=True,
-        )
-
-        assert not os.path.exists(mloc)
+        if env_var_set:
+            os.environ["DES_ARCHIVE_ACCESS_DB"] == old_db
+        else:
+            del os.environ["DES_ARCHIVE_ACCESS_DB"]

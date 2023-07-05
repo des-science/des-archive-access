@@ -116,7 +116,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -l LIST, --list LIST  download all file in a list
+  -l LIST, --list LIST  download all files in a list
   -p PREFIX, --prefix PREFIX
                         HTTPS address of the archive
 $ des-archive-access-download OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz

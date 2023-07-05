@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from des_archive_access.cli import get_des_archive_access_db
+from des_archive_access.dbfiles import get_des_archive_access_db
 
 
 def test_download_help():

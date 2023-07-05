@@ -154,18 +154,31 @@ def main_process_cert():
 
     if args.cert is not None and not os.path.exists(cloc):
         _check_openssl_version()
+        make_des_archive_access_dir()
 
-        with tempfile.TemporaryDirectory() as tmpdir, pushd(tmpdir):
-            subprocess.run(
-                "openssl pkcs12 -in %s -nodes -legacy > temp" % args.cert,
-                shell=True,
-                check=True,
-            )
-            subprocess.run(
-                "openssl pkcs12 -export -out %s -in temp" % cloc,
-                shell=True,
-                check=True,
-            )
-            pw = getpass.getpass()
-            with open(ploc, "w") as fp:
-                fp.write(pw)
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir, pushd(tmpdir):
+                subprocess.run(
+                    "openssl pkcs12 -in %s -nodes -legacy > temp" % args.cert,
+                    shell=True,
+                    check=True,
+                )
+                subprocess.run(
+                    "openssl pkcs12 -export -out %s -in temp" % cloc,
+                    shell=True,
+                    check=True,
+                )
+                pw = getpass.getpass()
+                with open(ploc, "w") as fp:
+                    fp.write(pw)
+        except (KeyboardInterrupt, Exception) as e:
+            try:
+                os.remove(cloc)
+            except Exception:
+                pass
+            try:
+                os.remove(ploc)
+            except Exception:
+                pass
+
+            raise e

@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 
 des_archive_access/_version.py
+
+*.sql
+*.fits

@@ -1,6 +1,5 @@
 import argparse
 import contextlib
-import getpass
 import os
 import subprocess
 import sys
@@ -10,15 +9,79 @@ import requests
 from tqdm import tqdm
 
 from des_archive_access.dbfiles import (
+    download_file,
     get_des_archive_access_db,
     get_des_archive_access_dir,
     make_des_archive_access_dir,
 )
 
 
+# https://stackoverflow.com/questions/6194499/pushd-through-os-system
+@contextlib.contextmanager
+def pushd(new_dir):
+    previous_dir = os.getcwd()
+    os.chdir(new_dir)
+    try:
+        yield
+    finally:
+        os.chdir(previous_dir)
+
+
 def main_download():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-download",
+        description="download files from the DES archive at FNAL",
+    )
+    parser.add_argument(
+        "file",
+        type=str,
+        default=None,
+        help="file to download",
+        nargs="?",
+    )
+    parser.add_argument(
+        "-l",
+        "--list",
+        type=str,
+        default=None,
+        help="download all files in a list",
+    )
+    parser.add_argument(
+        "-p",
+        "--prefix",
+        type=str,
+        default=None,
+        help="HTTPS address of the archive",
+    )
+    parser.add_argument(
+        "-dd",
+        "--desdata",
+        type=str,
+        default=None,
+        help="The destination DESDATA directory.",
+    )
+    args = parser.parse_args()
+
+    prefix = args.prefix or os.environ.get(
+        "DES_ARCHIVE_ACCESS_PREFIX",
+        "https://fndcadoor.fnal.gov:2880/des/persistent/DESDM_ARCHIVE",
+    )
+
+    desdata = args.desdata or os.environ["DESDATA"]
+
+    if args.file is not None:
+        print(download_file(args.file, prefix=prefix, desdata=desdata))
+
+    if args.list is not None:
+        with open(args.list) as fp:
+            for line in fp:
+                line = line.strip()
+                download_file(line, prefix=prefix, desdata=desdata)
+
+
+def main_download_metadata():
+    parser = argparse.ArgumentParser(
+        prog="des-archive-access-download-metadata",
         description="download the metadata for the DES archive at FNAL",
     )
     parser.add_argument(
@@ -100,17 +163,6 @@ def _check_openssl_version():
     return version
 
 
-# https://stackoverflow.com/questions/6194499/pushd-through-os-system
-@contextlib.contextmanager
-def pushd(new_dir):
-    previous_dir = os.getcwd()
-    os.chdir(new_dir)
-    try:
-        yield
-    finally:
-        os.chdir(previous_dir)
-
-
 def main_process_cert():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-process-cert",
@@ -127,23 +179,18 @@ def main_process_cert():
         "-f",
         "--force",
         action="store_true",
-        help="forcibly replace the current certificate and password",
+        help="forcibly replace the current certificate",
     )
     parser.add_argument(
-        "--remove", action="store_true", help="remove existing certificate and password"
+        "--remove", action="store_true", help="remove existing certificate"
     )
     args = parser.parse_args()
 
     cloc = os.path.join(get_des_archive_access_dir(), "cert.p12")
-    ploc = os.path.join(get_des_archive_access_dir(), "password_for_cert")
 
     if args.remove or args.force:
         try:
             os.remove(cloc)
-        except Exception:
-            pass
-        try:
-            os.remove(ploc)
         except Exception:
             pass
 
@@ -166,16 +213,9 @@ def main_process_cert():
                     shell=True,
                     check=True,
                 )
-                pw = getpass.getpass()
-                with open(ploc, "w") as fp:
-                    fp.write(pw)
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(cloc)
-            except Exception:
-                pass
-            try:
-                os.remove(ploc)
             except Exception:
                 pass
 

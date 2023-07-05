@@ -119,6 +119,12 @@ options:
   -l LIST, --list LIST  download all file in a list
   -p PREFIX, --prefix PREFIX
                         HTTPS address of the archive
+$ des-archive-access-download OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 14.1M  100 14.1M    0     0  13.6M      0  0:00:01  0:00:01 --:--:-- 15.3M
+/Users/beckermr/DESDATA/OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
 ```
 
 You must set the `DESDATA` environment variable. Files will be downloaded to this location at the same relative path as the location in the archive.

@@ -26,6 +26,7 @@ def make_des_archive_access_dir():
 
 
 def get_des_archive_access_db():
+    """Get the metadata DB location."""
     return os.environ.get(
         "DES_ARCHIVE_ACCESS_DB",
         os.path.join(

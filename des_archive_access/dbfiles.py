@@ -1,6 +1,5 @@
 import os
 import sqlite3
-
 from functools import lru_cache
 
 

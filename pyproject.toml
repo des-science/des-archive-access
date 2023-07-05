@@ -12,20 +12,20 @@ authors = [
     {name = "Matthew R. Becker", email = "mrbecker@anl.gov"},
 ]
 description = "access the DES archive at FNAL"
-dynamic = ["version"]
-dependencies = [
-    "requests",
-    "pyyaml"
-]
+dynamic = ["version", "dependencies"]
 license = {file = "LICENSE"}
 readme = "README.md"
 
 [project.scripts]
 des-archive-access-download = "des_archive_access.cli:main_download"
 des-archive-access-process-cert = "des_archive_access.cli:main_process_cert"
+des-archive-access = "des_archive_access.repl:cli"
 
 [project.urls]
 home = "https://github.com/des-science/des-archive-access"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools_scm]
 write_to = "des_archive_access/_version.py"

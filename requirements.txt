@@ -1,3 +1,6 @@
-pyyaml
+click
+click-repl
+fitsio
+numpy
 requests
 tqdm

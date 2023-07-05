@@ -1,4 +1,5 @@
 import time
+
 import fitsio
 import numpy as np
 
@@ -6,21 +7,15 @@ from des_archive_access.dbfiles import get_des_archive_access_db_conn
 
 
 def _print_time(t0, nrows):
-    print("found %d rows in %f seconds (%f rows/s)" % (nrows, t0, nrows/t0))
+    print("found %d rows in %f seconds (%f rows/s)" % (nrows, t0, nrows / t0))
 
 
 def _print_table(columns, rows, t0):
     _print_time(t0, len(rows))
-    rows = [
-        tuple(str(r) for r in row)
-        for row in rows
-    ]
+    rows = [tuple(str(r) for r in row) for row in rows]
     mlens = []
     for i in range(len(columns)):
-        mlens.append(max(
-            len(cr[i])
-            for cr in ([columns] + rows)
-        ))
+        mlens.append(max(len(cr[i]) for cr in ([columns] + rows)))
     fmt = ""
     for mlen in mlens:
         fmt += " %-" + str(mlen) + "s"
@@ -38,10 +33,7 @@ def _write_table(columns, curr, fname, t0):
         descr = []
         for i, col in enumerate(columns):
             if isinstance(rows[0][i], str):
-                mlen = max(
-                    len(r[i])
-                    for r in rows
-                )
+                mlen = max(len(r[i]) for r in rows)
                 mlen = max(mlen, 1)
                 descr.append((col, "U%d" % mlen))
             elif isinstance(rows[0][i], int):

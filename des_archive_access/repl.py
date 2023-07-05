@@ -19,7 +19,7 @@ def cli(ctx, command, loadsql):
         query = command
 
     if loadsql is not None:
-        with open(loadsql, "r") as fp:
+        with open(loadsql) as fp:
             query = fp.read()
 
     if query is not None:

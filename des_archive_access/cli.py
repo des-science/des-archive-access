@@ -53,20 +53,30 @@ def main_download():
         default=None,
         help="HTTPS address of the archive",
     )
+    parser.add_argument(
+        "-dd",
+        "--desdata",
+        type=str,
+        default=None,
+        help="The destination DESDATA directory.",
+    )
     args = parser.parse_args()
 
     prefix = args.prefix or os.environ.get(
         "DES_ARCHIVE_ACCESS_PREFIX",
         "https://fndcadoor.fnal.gov:2880/des/persistent/DESDM_ARCHIVE",
     )
+
+    desdata = args.desdata or os.environ["DESDATA"]
+
     if args.file is not None:
-        print(download_file(args.file, prefix=prefix))
+        print(download_file(args.file, prefix=prefix, desdata=desdata))
 
     if args.list is not None:
         with open(args.list) as fp:
             for line in fp:
                 line = line.strip()
-                download_file(line, prefix=prefix)
+                download_file(line, prefix=prefix, desdata=desdata)
 
 
 def main_download_metadata():

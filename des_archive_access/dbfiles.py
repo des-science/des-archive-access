@@ -40,14 +40,19 @@ def get_des_archive_access_db_conn():
     )
 
 
-def download_file(fname, prefix=None):
-    """Download a file FNAME from the DES FNAL archive "
-    "possibly with an option HTTPS `prefix`. Returns the local path to the file."""
+def download_file(fname, prefix=None, desdata=None):
+    """Download a file FNAME from the DES FNAL archive
+    possibly with an optional HTTPS `prefix` and optional `desdata` destination.
+
+    Returns the local path to the file.
+    """
     prefix = prefix or os.environ.get(
         "DES_ARCHIVE_ACCESS_PREFIX",
         "https://fndcadoor.fnal.gov:2880/des/persistent/DESDM_ARCHIVE",
     )
-    fpth = os.path.join(os.environ["DESDATA"], fname)
+    desdata = desdata or os.environ["DESDATA"]
+
+    fpth = os.path.join(desdata, fname)
     os.makedirs(os.path.dirname(fpth), exist_ok=True)
     cmd = (
         "curl -k -L --cert-type P12 --cert "
@@ -58,5 +63,5 @@ def download_file(fname, prefix=None):
         prefix,
         fname,
     )
-    subprocess.run(cmd, shell=True, check=True, cwd=os.environ["DESDATA"])
+    subprocess.run(cmd, shell=True, check=True, cwd=desdata)
     return fpth

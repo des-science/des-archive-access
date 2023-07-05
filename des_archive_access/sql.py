@@ -10,7 +10,9 @@ def _print_time(t0, nrows):
     print("found %d rows in %f seconds (%f rows/s)" % (nrows, t0, nrows / t0))
 
 
-def _print_table(columns, rows, t0):
+def _print_table(columns, curr, t0):
+    rows = curr.fetchall()
+    t0 = time.time() - t0
     _print_time(t0, len(rows))
     rows = [tuple(str(r) for r in row) for row in rows]
     mlens = []
@@ -28,6 +30,7 @@ def _print_table(columns, rows, t0):
 
 def _write_table(columns, curr, fname, t0):
     rows = curr.fetchall()
+    t0 = time.time() - t0
     _print_time(t0, len(rows))
     if len(rows) > 0:
         descr = []
@@ -65,12 +68,10 @@ def parse_and_execute_query(query):
         curr.arraysize = 100
         t0 = time.time()
         curr.execute(query)
-        t0 = time.time() - t0
         columns = tuple(d[0] for d in curr.description)
         if fname is not None:
             _write_table(columns, curr, fname, t0)
         else:
-            rows = curr.fetchall()
-            _print_table(columns, rows, t0)
+            _print_table(columns, curr, t0)
     finally:
         curr.close()

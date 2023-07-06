@@ -47,36 +47,49 @@ def main_download():
         help="download all files in a list",
     )
     parser.add_argument(
-        "-p",
-        "--prefix",
+        "-a",
+        "--archive",
         type=str,
         default=None,
-        help="HTTPS address of the archive",
+        help="HTTPS address of the FNAL archive",
     )
     parser.add_argument(
-        "-dd",
+        "-d",
         "--desdata",
         type=str,
         default=None,
         help="The destination DESDATA directory.",
     )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="force the download even if data already exists",
+    )
     args = parser.parse_args()
 
-    prefix = args.prefix or os.environ.get(
-        "DES_ARCHIVE_ACCESS_PREFIX",
+    prefix = args.archive or os.environ.get(
+        "DES_ARCHIVE_ACCESS_ARCHIVE",
         "https://fndcadoor.fnal.gov:2880/des/persistent/DESDM_ARCHIVE",
     )
 
     desdata = args.desdata or os.environ["DESDATA"]
 
     if args.file is not None:
-        print(download_file(args.file, prefix=prefix, desdata=desdata))
+        print(
+            download_file(
+                args.file,
+                prefix=prefix,
+                desdata=desdata,
+                force=args.force,
+            )
+        )
 
     if args.list is not None:
         with open(args.list) as fp:
             for line in fp:
                 line = line.strip()
-                download_file(line, prefix=prefix, desdata=desdata)
+                download_file(line, prefix=prefix, desdata=desdata, force=args.force)
 
 
 def main_download_metadata():
@@ -149,7 +162,7 @@ def main_download_metadata():
             raise e
 
 
-def _check_openssl_version():
+def _is_openssl_v3():
     res = subprocess.run(
         "openssl version",
         shell=True,
@@ -157,10 +170,7 @@ def _check_openssl_version():
         capture_output=True,
     )
     version = res.stdout.decode("utf-8").split()[1]
-    assert version[0] == "3", (
-        "OpenSSL version needs to be at least version 3: found %s" % version
-    )
-    return version
+    return version[0] == "3"
 
 
 def main_process_cert():
@@ -198,13 +208,17 @@ def main_process_cert():
         sys.exit(0)
 
     if args.cert is not None and (not os.path.exists(cloc) or args.force):
-        _check_openssl_version()
+
         make_des_archive_access_dir()
+        if _is_openssl_v3():
+            legacy = "-legacy"
+        else:
+            legacy = ""
 
         try:
             with tempfile.TemporaryDirectory() as tmpdir, pushd(tmpdir):
                 subprocess.run(
-                    "openssl pkcs12 -in %s -nodes -legacy > temp" % args.cert,
+                    f"openssl pkcs12 -in {args.cert} -nodes {legacy} > temp",
                     shell=True,
                     check=True,
                 )

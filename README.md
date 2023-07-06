@@ -107,7 +107,7 @@ You can use the `des-archive-access-download` command to download files from the
 
 ```bash
 $ des-archive-access-download --help
-usage: des-archive-access-download [-h] [-l LIST] [-p PREFIX] [file]
+usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [file]
 
 download files from the DES archive at FNAL
 
@@ -117,8 +117,11 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -l LIST, --list LIST  download all files in a list
-  -p PREFIX, --prefix PREFIX
-                        HTTPS address of the archive
+  -a ARCHIVE, --archive ARCHIVE
+                        HTTPS address of the FNAL archive
+  -d DESDATA, --desdata DESDATA
+                        The destination DESDATA directory.
+  -f, --force           force the download even if data already exists
 $ des-archive-access-download OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed

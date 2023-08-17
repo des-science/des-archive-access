@@ -4,6 +4,16 @@
 
 tools for accessing the DES data archive at FNAL
 
+## Installation
+
+Install the package directly from GitHub with `pip`
+
+```bash
+pip install git+https://github.com/des-science/des-archive-access.git
+```
+
+You will need at least Python 3.8.
+
 ## Instructions for Generating a CILogon Certificate (2023/07/05)
 
 In order to download files from thr archive, you need a CILogon certificate. Follow the instructions below to obtain one.

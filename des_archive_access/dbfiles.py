@@ -40,7 +40,7 @@ def get_des_archive_access_db_conn():
     )
 
 
-def download_file(fname, prefix=None, desdata=None, force=False):
+def download_file(fname, prefix=None, desdata=None, force=False, debug=False):
     """Download a file FNAME from the DES FNAL archive
     possibly with an optional HTTPS `prefix` and optional `desdata` destination.
 
@@ -60,10 +60,16 @@ def download_file(fname, prefix=None, desdata=None, force=False):
         except Exception:
             pass
 
+    if debug:
+        debug = "-vv"
+    else:
+        debug = ""
+
     cmd = (
-        "curl -vv -k -L --cert "
+        "curl {} -k -L --cert "
         "{}:${{DES_ARCHIVE_ACCESS_PASSWORD}} -o {} -C - {}/{}"
     ).format(
+        debug,
         os.path.join(get_des_archive_access_dir(), "cert.pem"),
         fpth,
         prefix,

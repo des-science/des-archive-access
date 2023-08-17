@@ -63,7 +63,12 @@ def main_download():
         "-f",
         "--force",
         action="store_true",
-        help="force the download even if data already exists",
+        help="Force the download even if data already exists",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Run 'curl' with '-vv' to debug connection and download issues.",
     )
     args = parser.parse_args()
 
@@ -81,6 +86,7 @@ def main_download():
                 prefix=prefix,
                 desdata=desdata,
                 force=args.force,
+                debug=args.debug,
             )
         )
 
@@ -88,7 +94,13 @@ def main_download():
         with open(args.list) as fp:
             for line in fp:
                 line = line.strip()
-                download_file(line, prefix=prefix, desdata=desdata, force=args.force)
+                download_file(
+                    line,
+                    prefix=prefix,
+                    desdata=desdata,
+                    force=args.force,
+                    debug=args.debug,
+                )
 
 
 def main_download_metadata():

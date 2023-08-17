@@ -3,7 +3,6 @@ import contextlib
 import os
 import subprocess
 import sys
-import tempfile
 
 import requests
 from tqdm import tqdm
@@ -196,7 +195,7 @@ def main_process_cert():
     )
     args = parser.parse_args()
 
-    cloc = os.path.join(get_des_archive_access_dir(), "cert.p12")
+    cloc = os.path.join(get_des_archive_access_dir(), "cert.pem")
 
     if args.remove or args.force:
         try:
@@ -216,17 +215,11 @@ def main_process_cert():
             legacy = ""
 
         try:
-            with tempfile.TemporaryDirectory() as tmpdir, pushd(tmpdir):
-                subprocess.run(
-                    f"openssl pkcs12 -in {args.cert} -nodes {legacy} > temp",
-                    shell=True,
-                    check=True,
-                )
-                subprocess.run(
-                    "openssl pkcs12 -export -out %s -in temp" % cloc,
-                    shell=True,
-                    check=True,
-                )
+            subprocess.run(
+                f"openssl pkcs12 -in {args.cert} -out {cloc} -nodes {legacy}",
+                shell=True,
+                check=True,
+            )
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(cloc)

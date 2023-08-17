@@ -216,7 +216,7 @@ def main_process_cert():
             pass
 
     if args.remove:
-        print("Removed certificate at {cloc}.", flush=True)
+        print(f"Removed certificate at {cloc}.", flush=True)
         sys.exit(0)
 
     if args.cert is not None and (not os.path.exists(cloc) or args.force):
@@ -242,7 +242,7 @@ def main_process_cert():
             raise e
     else:
         print(
-            "Certificate {cloc} already exists!\nRun your command "
+            f"Certificate {cloc} already exists!\nRun your command "
             "with the `--force` flag to forcibly replace the current "
             "certificate.",
             flush=True,

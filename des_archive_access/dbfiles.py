@@ -64,7 +64,7 @@ def download_file(fname, prefix=None, desdata=None, force=False):
         "curl -vv -k -L --cert-type P12 --cert "
         "{}:${{DES_ARCHIVE_ACCESS_PASSWORD}} -o {} -C - {}/{}"
     ).format(
-        os.path.join(get_des_archive_access_dir(), "cert.p12"),
+        os.path.join(get_des_archive_access_dir(), "cert.pem"),
         fpth,
         prefix,
         fname,

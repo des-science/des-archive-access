@@ -1,7 +1,7 @@
 import os
-import sys
 import sqlite3
 import subprocess
+import sys
 from functools import lru_cache
 
 

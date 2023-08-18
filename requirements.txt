@@ -4,3 +4,4 @@ fitsio
 numpy
 requests
 tqdm
+zstandard

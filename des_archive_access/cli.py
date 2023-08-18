@@ -1,10 +1,10 @@
 import argparse
-import contextlib
 import os
 import subprocess
 import sys
 
 import requests
+import zstandard
 from tqdm import tqdm
 
 from des_archive_access.dbfiles import (
@@ -13,17 +13,6 @@ from des_archive_access.dbfiles import (
     get_des_archive_access_dir,
     make_des_archive_access_dir,
 )
-
-
-# https://stackoverflow.com/questions/6194499/pushd-through-os-system
-@contextlib.contextmanager
-def pushd(new_dir):
-    previous_dir = os.getcwd()
-    os.chdir(new_dir)
-    try:
-        yield
-    finally:
-        os.chdir(previous_dir)
 
 
 def main_download():
@@ -146,7 +135,7 @@ def main_download_metadata():
             # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
             url = args.url or (
                 "http://deslogin.cosmology.illinois.edu/~donaldp/"
-                "desdm-file-db-23-05-03-13-33/desdm-test.db"
+                "desdm-file-db-23-08-18-10-02/desdm-test.db.zst"
             )
             response = requests.get(url, stream=True)
             total_size_in_bytes = int(response.headers.get("content-length", 0))
@@ -158,19 +147,32 @@ def main_download_metadata():
                 ncols=80,
                 desc="downloading DB",
             ) as progress_bar:
-                with open(mloc, "wb") as file:
+                with open(mloc + ".zstd", "wb") as file:
                     for data in response.iter_content(block_size):
                         progress_bar.update(len(data))
                         file.write(data)
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
                 raise RuntimeError("Download failed!")
+
+            # decompress
+            print("decompressing...", end="", flush=True)
+            dctx = zstandard.ZstdDecompressor()
+            with open(mloc + ".zstd", "rb") as ifh, open(mloc, "wb") as ofh:
+                dctx.copy_stream(ifh, ofh)
+            print("done.", flush=True)
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(mloc)
+                os.remove(mloc + ".zstd")
             except Exception:
                 pass
 
             raise e
+        finally:
+            try:
+                os.remove(mloc + ".zstd")
+            except Exception:
+                pass
 
 
 def _is_openssl_v3():

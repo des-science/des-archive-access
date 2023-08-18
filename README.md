@@ -14,6 +14,7 @@ Install the package and dependencies directly from GitHub with `pip`
 
 ```bash
 pip install git+https://github.com/fermitools/htgettoken.git
+pip install numpy  # you may need this to make sure fitsio installs ok
 pip install git+https://github.com/des-science/des-archive-access.git
 ```
 

@@ -132,12 +132,18 @@ def main_download_metadata():
         else:
             os.makedirs(os.path.dirname(mloc), exist_ok=True)
 
+        url = args.url or (
+            "http://deslogin.cosmology.illinois.edu/~donaldp/"
+            "desdm-file-db-23-08-18-10-02/desdm-test.db.zst"
+        )
+
+        if url.endswith(".zstd"):
+            dest = mloc + ".zstd"
+        else:
+            dest = mloc
+
         try:
             # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
-            url = args.url or (
-                "http://deslogin.cosmology.illinois.edu/~donaldp/"
-                "desdm-file-db-23-08-18-10-02/desdm-test.db.zst"
-            )
             response = requests.get(url, stream=True)
             total_size_in_bytes = int(response.headers.get("content-length", 0))
             block_size = 1024
@@ -148,7 +154,7 @@ def main_download_metadata():
                 ncols=80,
                 desc="downloading DB",
             ) as progress_bar:
-                with open(mloc + ".zstd", "wb") as file:
+                with open(dest, "wb") as file:
                     for data in response.iter_content(block_size):
                         progress_bar.update(len(data))
                         file.write(data)
@@ -156,22 +162,25 @@ def main_download_metadata():
                 raise RuntimeError("Download failed!")
 
             # decompress
-            print("decompressing...", end="", flush=True)
-            dctx = zstandard.ZstdDecompressor()
-            with open(mloc + ".zstd", "rb") as ifh, open(mloc, "wb") as ofh:
-                dctx.copy_stream(ifh, ofh)
-            print("done.", flush=True)
+            if url.endswith(".zstd"):
+                print("decompressing...", end="", flush=True)
+                dctx = zstandard.ZstdDecompressor()
+                with open(mloc + ".zstd", "rb") as ifh, open(mloc, "wb") as ofh:
+                    dctx.copy_stream(ifh, ofh)
+                print("done.", flush=True)
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(mloc)
-                os.remove(mloc + ".zstd")
+                if url.endswith(".zstd"):
+                    os.remove(mloc + ".zstd")
             except Exception:
                 pass
 
             raise e
         finally:
             try:
-                os.remove(mloc + ".zstd")
+                if url.endswith(".zstd"):
+                    os.remove(mloc + ".zstd")
             except Exception:
                 pass
 

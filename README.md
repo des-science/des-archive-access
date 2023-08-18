@@ -75,9 +75,9 @@ If no flag is given, the `des-archive-access` command loads you into SQL shell. 
 
 ```bash
 $ des-archive-access
-> sql select band, tilename, ccdnum, filename from y6a2_image limit 10; > blah.fits
+> select band, tilename, ccdnum, filename from y6a2_image limit 10; > blah.fits
 found 10 rows in 0.015860 seconds (630.504337 rows/s)
-> sql select band, tilename, ccdnum, filename from y6a2_image limit 10;
+> select band, tilename, ccdnum, filename from y6a2_image limit 10;
 found 10 rows in 0.000135 seconds (73973.615520 rows/s)
 
 BAND TILENAME CCDNUM FILENAME
@@ -139,5 +139,4 @@ You must set the `DESDATA` environment variable. Files will be downloaded to thi
 ## Differences between `des-archive-access` and `easyaccess`
 
 - `des-archive-access` currently only supports writing SQL queries in FITS binary format and in only a single file.
-- When executing SQL commands in the SQL shell, you have to prefix the command by `sql`.
 - All of the `easyaccess` features for introspecting tables and columns are not yet implemented.

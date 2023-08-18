@@ -20,7 +20,7 @@ readme = "README.md"
 [project.scripts]
 des-archive-access-download = "des_archive_access.cli:main_download"
 des-archive-access-download-metadata = "des_archive_access.cli:main_download_metadata"
-des-archive-access-process-cert = "des_archive_access.cli:main_process_cert"
+des-archive-access-make-token = "des_archive_access.cli:main_make_token"
 des-archive-access = "des_archive_access.repl:cli"
 
 [project.urls]

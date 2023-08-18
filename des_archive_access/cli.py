@@ -18,7 +18,7 @@ from des_archive_access.dbfiles import (
 def main_download():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-download",
-        description="download files from the DES archive at FNAL",
+        description="Download files from the DES archive at FNAL.",
     )
     parser.add_argument(
         "file",
@@ -57,7 +57,8 @@ def main_download():
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Run 'curl' with '-vv' to debug connection and download issues.",
+        help="Print the 'curl' command and stderr to help debug "
+        "connection and download issues.",
     )
     args = parser.parse_args()
 
@@ -95,7 +96,7 @@ def main_download():
 def main_download_metadata():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-download-metadata",
-        description="download the metadata for the DES archive at FNAL",
+        description="Download the metadata for the DES archive at FNAL.",
     )
     parser.add_argument(
         "--url",
@@ -131,12 +132,18 @@ def main_download_metadata():
         else:
             os.makedirs(os.path.dirname(mloc), exist_ok=True)
 
+        url = args.url or (
+            "http://deslogin.cosmology.illinois.edu/~donaldp/"
+            "desdm-file-db-23-08-18-10-02/desdm-test.db.zst"
+        )
+
+        if url.endswith(".zstd"):
+            dest = mloc + ".zstd"
+        else:
+            dest = mloc
+
         try:
             # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
-            url = args.url or (
-                "http://deslogin.cosmology.illinois.edu/~donaldp/"
-                "desdm-file-db-23-08-18-10-02/desdm-test.db.zst"
-            )
             response = requests.get(url, stream=True)
             total_size_in_bytes = int(response.headers.get("content-length", 0))
             block_size = 1024
@@ -147,7 +154,7 @@ def main_download_metadata():
                 ncols=80,
                 desc="downloading DB",
             ) as progress_bar:
-                with open(mloc + ".zstd", "wb") as file:
+                with open(dest, "wb") as file:
                     for data in response.iter_content(block_size):
                         progress_bar.update(len(data))
                         file.write(data)
@@ -155,98 +162,42 @@ def main_download_metadata():
                 raise RuntimeError("Download failed!")
 
             # decompress
-            print("decompressing...", end="", flush=True)
-            dctx = zstandard.ZstdDecompressor()
-            with open(mloc + ".zstd", "rb") as ifh, open(mloc, "wb") as ofh:
-                dctx.copy_stream(ifh, ofh)
-            print("done.", flush=True)
+            if url.endswith(".zstd"):
+                print("decompressing...", end="", flush=True)
+                dctx = zstandard.ZstdDecompressor()
+                with open(mloc + ".zstd", "rb") as ifh, open(mloc, "wb") as ofh:
+                    dctx.copy_stream(ifh, ofh)
+                print("done.", flush=True)
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(mloc)
-                os.remove(mloc + ".zstd")
+                if url.endswith(".zstd"):
+                    os.remove(mloc + ".zstd")
             except Exception:
                 pass
 
             raise e
         finally:
             try:
-                os.remove(mloc + ".zstd")
+                if url.endswith(".zstd"):
+                    os.remove(mloc + ".zstd")
             except Exception:
                 pass
 
 
-def _is_openssl_v3():
-    res = subprocess.run(
-        "openssl version",
+def main_make_token():
+    parser = argparse.ArgumentParser(
+        prog="des-archive-access-make-token",
+        description="Make the OIDC token for FNAL dCache. "
+        "Any extra arguemnts are passed to `htgettoken`.",
+    )
+    args, unknown = parser.parse_known_args()
+    extra_args = " ".join(unknown)
+
+    make_des_archive_access_dir(fix_permissions=True)
+    tloc = os.path.join(get_des_archive_access_dir(), "token")
+    subprocess.run(
+        f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}",
         shell=True,
         check=True,
-        capture_output=True,
     )
-    version = res.stdout.decode("utf-8").split()[1]
-    return version[0] == "3"
-
-
-def main_process_cert():
-    parser = argparse.ArgumentParser(
-        prog="des-archive-access-process-cert",
-        description="process the CILogon certificate for DES archive access",
-    )
-    parser.add_argument(
-        "cert",
-        type=str,
-        help="certificate to process",
-        nargs="?",
-        default=None,
-    )
-    parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="forcibly replace the current certificate",
-    )
-    parser.add_argument(
-        "--remove", action="store_true", help="remove existing certificate"
-    )
-    args = parser.parse_args()
-
-    cloc = os.path.join(get_des_archive_access_dir(), "cert.pem")
-
-    if args.remove or args.force:
-        try:
-            os.remove(cloc)
-        except Exception:
-            pass
-
-    if args.remove:
-        print(f"Removed certificate at {cloc}.", flush=True)
-        sys.exit(0)
-
-    if args.cert is not None and (not os.path.exists(cloc) or args.force):
-
-        make_des_archive_access_dir()
-        if _is_openssl_v3():
-            legacy = "-legacy"
-        else:
-            legacy = ""
-
-        try:
-            subprocess.run(
-                f"openssl pkcs12 -in {args.cert} -out {cloc} -nodes {legacy}",
-                shell=True,
-                check=True,
-            )
-        except (KeyboardInterrupt, Exception) as e:
-            try:
-                os.remove(cloc)
-            except Exception:
-                pass
-
-            raise e
-    else:
-        print(
-            f"Certificate {cloc} already exists!\nRun your command "
-            "with the `--force` flag to forcibly replace the current "
-            "certificate.",
-            flush=True,
-        )
-        sys.exit(1)

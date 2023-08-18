@@ -13,11 +13,14 @@ def get_des_archive_access_dir():
     )
 
 
-def make_des_archive_access_dir():
+def make_des_archive_access_dir(fix_permissions=False):
     """Make the DES_ARCHIVE_ACCESS_DIR and set permissions to 700."""
     daad = get_des_archive_access_dir()
     os.makedirs(daad, exist_ok=True)
     os.chmod(daad, 0o700)
+    if fix_permissions:
+        for fname in os.listdir(daad):
+            os.chmod(os.path.join(daad, fname), 0o600)
 
 
 def get_des_archive_access_db():
@@ -61,19 +64,19 @@ def download_file(fname, prefix=None, desdata=None, force=False, debug=False):
         except Exception:
             pass
 
-    if debug:
-        debug_str = "-vv"
-    else:
-        debug_str = ""
-
-    cmd = ("curl {} -k -L --cert {} -o {} -C - {}/{}").format(
-        debug_str,
-        os.path.join(get_des_archive_access_dir(), "cert.pem"),
+    cmd = ('curl -L -H "Authorization: Bearer $(<{})" -o {} -C - {}/{}').format(
+        os.path.join(get_des_archive_access_dir(), "token"),
         fpth,
         prefix,
         fname,
     )
     if debug:
         print(cmd, file=sys.stderr)
-    subprocess.run(cmd, shell=True, check=True, cwd=desdata)
+    subprocess.run(
+        cmd,
+        shell=True,
+        check=True,
+        cwd=desdata,
+        stderr=None if debug else subprocess.PIPE,
+    )
     return fpth

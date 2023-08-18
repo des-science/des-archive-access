@@ -6,31 +6,46 @@ tools for accessing the DES data archive at FNAL
 
 ## Installation
 
-Install the package directly from GitHub with `pip`
+**Right now this package is in its alpha state and so all installation is directly from the `main` branch!**
+
+### PyPI
+
+Install the package and dependencies directly from GitHub with `pip`
 
 ```bash
+pip install git+https://github.com/fermitools/htgettoken.git
 pip install git+https://github.com/des-science/des-archive-access.git
+```
+
+### conda
+
+Install the dependencies with `conda` and then install the tool with `pip`
+
+```bash
+git clone https://github.com/des-science/des-archive-access.git
+cd des-archive-access
+conda install --file requirements.txt --file requirements-dev.txt
+pip install --no-deps --no-build-isolation .
+cd -
 ```
 
 You will need at least Python 3.8.
 
-## Instructions for Generating a CILogon Certificate (2023/07/05)
+## Instructions for Generating an OIDC Token for FNAL dCache (2023/08/18)
 
-In order to download files from thr archive, you need a CILogon certificate. Follow the instructions below to obtain one.
+In order to download files, you need to generate an OIDC token. To make the token, do the following.
 
-1. Go to [cilogon.org](https://cilogon.org/)
-2. Login with your FNAL services account.
-3. Click the ***Create Password-Protected Certificate*** link.
-4. Follow the instructions to download a certificate.
-5. Reformat the certificate by executing `des-archive-access-process-cert /path/to/cert`. This command will ask you for the password you entered when making the certificate. (Hopefully we don't have to do this in the future.)
+1. Run the command line tool `des-archive-access-make-token`.
+2. You will be redirected to a CILogon website.
+3. Login with your **FNAL SERVICES** account. You may be offered other identity providers, but you have to use the FNAL one!
 
-The certificate will be stored in the `~/.des_archive_access/` directory in your home area. **Make the sure the permissions on this directory are `700` via `chmod 700 ~/.des_archive_access/`.** You can change this location by setting the environment variable `DES_ARCHIVE_ACCESS_DIR`.
+The token will be stored in the `~/.des_archive_access/` directory in your home area. **Make the sure the permissions on this directory are `700` via `chmod 700 ~/.des_archive_access/`.** You can change this location by setting the environment variable `DES_ARCHIVE_ACCESS_DIR`.
 
 ## Usage
 
 ### Downloading the Archive Metadata
 
-Before you can query the file archive metadata, you need to download the metadata database (roughly 30GB!!!) via the `des-archive-access-download-metadata`
+Before you can query the file archive metadata, you need to download the metadata database (roughly 8GB) via the `des-archive-access-download-metadata`
 command. This command will put the data in your home area. If you'd like to specify a different path to the DB, set it via the environment variable `DES_ARCHIVE_ACCESS_DB` like this
 
 ```bash
@@ -111,9 +126,9 @@ You can use the `des-archive-access-download` command to download files from the
 
 ```bash
 $ des-archive-access-download --help
-usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [file]
+usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [--debug] [file]
 
-download files from the DES archive at FNAL
+Download files from the DES archive at FNAL.
 
 positional arguments:
   file                  file to download
@@ -125,12 +140,9 @@ options:
                         HTTPS address of the FNAL archive
   -d DESDATA, --desdata DESDATA
                         The destination DESDATA directory.
-  -f, --force           force the download even if data already exists
+  -f, --force           Force the download even if data already exists
+  --debug               Print the 'curl' command and stderr to help debug connection and download issues.
 $ des-archive-access-download OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 14.1M  100 14.1M    0     0  13.6M      0  0:00:01  0:00:01 --:--:-- 15.3M
 /Users/beckermr/DESDATA/OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
 ```
 

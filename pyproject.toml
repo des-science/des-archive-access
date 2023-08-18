@@ -8,6 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "des-archive-access"
+requires-python = ">=3.8"
 authors = [
     {name = "Matthew R. Becker", email = "mrbecker@anl.gov"},
 ]

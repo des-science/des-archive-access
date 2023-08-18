@@ -3,7 +3,6 @@ import contextlib
 import os
 import subprocess
 import sys
-import tempfile
 
 import requests
 from tqdm import tqdm
@@ -64,7 +63,12 @@ def main_download():
         "-f",
         "--force",
         action="store_true",
-        help="force the download even if data already exists",
+        help="Force the download even if data already exists",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Run 'curl' with '-vv' to debug connection and download issues.",
     )
     args = parser.parse_args()
 
@@ -82,6 +86,7 @@ def main_download():
                 prefix=prefix,
                 desdata=desdata,
                 force=args.force,
+                debug=args.debug,
             )
         )
 
@@ -89,7 +94,13 @@ def main_download():
         with open(args.list) as fp:
             for line in fp:
                 line = line.strip()
-                download_file(line, prefix=prefix, desdata=desdata, force=args.force)
+                download_file(
+                    line,
+                    prefix=prefix,
+                    desdata=desdata,
+                    force=args.force,
+                    debug=args.debug,
+                )
 
 
 def main_download_metadata():
@@ -196,7 +207,7 @@ def main_process_cert():
     )
     args = parser.parse_args()
 
-    cloc = os.path.join(get_des_archive_access_dir(), "cert.p12")
+    cloc = os.path.join(get_des_archive_access_dir(), "cert.pem")
 
     if args.remove or args.force:
         try:
@@ -205,6 +216,7 @@ def main_process_cert():
             pass
 
     if args.remove:
+        print(f"Removed certificate at {cloc}.", flush=True)
         sys.exit(0)
 
     if args.cert is not None and (not os.path.exists(cloc) or args.force):
@@ -216,17 +228,11 @@ def main_process_cert():
             legacy = ""
 
         try:
-            with tempfile.TemporaryDirectory() as tmpdir, pushd(tmpdir):
-                subprocess.run(
-                    f"openssl pkcs12 -in {args.cert} -nodes {legacy} > temp",
-                    shell=True,
-                    check=True,
-                )
-                subprocess.run(
-                    "openssl pkcs12 -export -out %s -in temp" % cloc,
-                    shell=True,
-                    check=True,
-                )
+            subprocess.run(
+                f"openssl pkcs12 -in {args.cert} -out {cloc} -nodes {legacy}",
+                shell=True,
+                check=True,
+            )
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(cloc)
@@ -234,3 +240,11 @@ def main_process_cert():
                 pass
 
             raise e
+    else:
+        print(
+            f"Certificate {cloc} already exists!\nRun your command "
+            "with the `--force` flag to forcibly replace the current "
+            "certificate.",
+            flush=True,
+        )
+        sys.exit(1)

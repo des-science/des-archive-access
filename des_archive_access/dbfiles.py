@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import subprocess
+import sys
 from functools import lru_cache
 
 
@@ -40,7 +41,7 @@ def get_des_archive_access_db_conn():
     )
 
 
-def download_file(fname, prefix=None, desdata=None, force=False):
+def download_file(fname, prefix=None, desdata=None, force=False, debug=False):
     """Download a file FNAME from the DES FNAL archive
     possibly with an optional HTTPS `prefix` and optional `desdata` destination.
 
@@ -60,14 +61,21 @@ def download_file(fname, prefix=None, desdata=None, force=False):
         except Exception:
             pass
 
+    if debug:
+        debug_str = "-vv"
+    else:
+        debug_str = ""
+
     cmd = (
-        "curl -k -L --cert-type P12 --cert "
-        "{}:${{DES_ARCHIVE_ACCESS_PASSWORD}} -o {} -C - {}/{}"
+        "curl {} -k -L --cert {}:${{DES_ARCHIVE_ACCESS_PASSWORD}} -o {} -C - {}/{}"
     ).format(
-        os.path.join(get_des_archive_access_dir(), "cert.p12"),
-        fname,
+        debug_str,
+        os.path.join(get_des_archive_access_dir(), "cert.pem"),
+        fpth,
         prefix,
         fname,
     )
+    if debug:
+        print(cmd, file=sys.stderr)
     subprocess.run(cmd, shell=True, check=True, cwd=desdata)
     return fpth

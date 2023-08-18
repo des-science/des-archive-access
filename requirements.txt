@@ -1,6 +1,7 @@
 click
 click-repl
 fitsio
+htgettoken
 numpy
 requests
 tqdm

@@ -64,3 +64,11 @@ jobs:
         shell: bash -el {0}
         run: |
           pytest -vvs tests
+
+      - name: cli tests
+        shell: bash -el {0}
+        run: |
+          des-archive-access-download --help
+          des-archive-access-download-metadata --help
+          des-archive-access-make-token --help
+          des-archive-access --help

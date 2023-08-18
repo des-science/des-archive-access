@@ -1,4 +1,5 @@
 import os
+import sys
 import sqlite3
 import subprocess
 from functools import lru_cache
@@ -61,18 +62,20 @@ def download_file(fname, prefix=None, desdata=None, force=False, debug=False):
             pass
 
     if debug:
-        debug = "-vv"
+        debug_str = "-vv"
     else:
-        debug = ""
+        debug_str = ""
 
     cmd = (
         "curl {} -k -L --cert {}:${{DES_ARCHIVE_ACCESS_PASSWORD}} -o {} -C - {}/{}"
     ).format(
-        debug,
+        debug_str,
         os.path.join(get_des_archive_access_dir(), "cert.pem"),
         fpth,
         prefix,
         fname,
     )
+    if debug:
+        print(cmd, file=sys.stderr)
     subprocess.run(cmd, shell=True, check=True, cwd=desdata)
     return fpth

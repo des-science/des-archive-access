@@ -94,7 +94,7 @@ def download_file(
         'curl --write-out "%{{http_code}}" -L '
         '-H "Authorization: Bearer $(<{})" -o {} -C - {}/{}'
     ).format(
-        os.path.join(get_des_archive_access_dir(), "token"),
+        os.path.join(get_des_archive_access_dir(), "bearer_token"),
         fpth,
         prefix,
         fname,

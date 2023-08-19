@@ -203,12 +203,20 @@ def main_make_token():
         "Any extra arguemnts are passed to `htgettoken`.",
     )
     args, unknown = parser.parse_known_args()
+    make_des_archive_access_dir(fix_permissions=True)
+
+    if not any("--vaulttokenfile" in uk for uk in unknown):
+        unknown += [
+            "--vaulttokenfile="
+            + os.path.join(get_des_archive_access_dir(), "vault_token")
+        ]
     extra_args = " ".join(unknown)
 
-    make_des_archive_access_dir(fix_permissions=True)
-    tloc = os.path.join(get_des_archive_access_dir(), "token")
+    tloc = os.path.join(get_des_archive_access_dir(), "bearer_token")
+    cmd = f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}"
+    print(cmd, file=sys.stderr)
     subprocess.run(
-        f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}",
+        cmd,
         shell=True,
         check=True,
     )

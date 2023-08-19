@@ -73,8 +73,9 @@ def download_file(
 
     if refresh_token:
         try:
+            cmd = "des-archive-access-make-token -v"
             r = subprocess.run(
-                "des-archive-access-make-token",
+                cmd,
                 shell=True,
                 check=True,
                 text=True,

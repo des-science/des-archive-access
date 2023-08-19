@@ -50,7 +50,7 @@ Before you can query the file archive metadata, you need to download the metadat
 command. This command will put the data in your home area. If you'd like to specify a different path to the DB, set it via the environment variable `DES_ARCHIVE_ACCESS_DB` like this
 
 ```bash
-$ export DES_ARCHIVE_ACCESS_DB=/my/metadata.db
+export DES_ARCHIVE_ACCESS_DB=/my/metadata.db
 ```
 
 ### Querying the Archive Metadata
@@ -61,7 +61,12 @@ Then you can use the `des-archive-access` command to interact with the metadata.
 $ des-archive-access --help
 Usage: des-archive-access [OPTIONS] COMMAND [ARGS]...
 
-  DES archive access CLI. Execute the CLI to start the SQL shell.
+  DES archive access CLI
+
+  Execute `des-archive-access` at the command line to run queries in an
+  interactive SQL shell.
+
+  Alternatively, use the options below to execute queries directly.
 
 Options:
   -l, --loadsql TEXT  Load a SQL command from a file and execute it.
@@ -69,7 +74,7 @@ Options:
   --help              Show this message and exit.
 
 Commands:
-  sql      Alternative way of loading a sql command from the QUERY...
+  sql      Execute a QUERY.
   sqlrepl  Alternative way of staring the SQL shell.
 $ des-archive-access -c "select band, tilename, ccdnum, filename from y6a2_image limit 10;"
 found 10 rows in 0.003719 seconds (2688.656410 rows/s)
@@ -127,7 +132,7 @@ You can use the `des-archive-access-download` command to download files from the
 
 ```bash
 $ des-archive-access-download --help
-usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [--debug] [file]
+usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [--debug] [--no-refresh-token] [file]
 
 Download files from the DES archive at FNAL.
 
@@ -143,6 +148,7 @@ options:
                         The destination DESDATA directory.
   -f, --force           Force the download even if data already exists
   --debug               Print the 'curl' command and stderr to help debug connection and download issues.
+  --no-refresh-token    Do not attempt to automatically refresh the OIDC token.
 $ des-archive-access-download OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
 /Users/beckermr/DESDATA/OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
 ```

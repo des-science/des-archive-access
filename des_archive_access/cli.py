@@ -20,14 +20,15 @@ def main_download():
         prog="des-archive-access-download",
         description="Download files from the DES archive at FNAL.",
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "file",
         type=str,
         default=None,
         help="file to download",
         nargs="?",
     )
-    parser.add_argument(
+    group.add_argument(
         "-l",
         "--list",
         type=str,
@@ -60,6 +61,11 @@ def main_download():
         help="Print the 'curl' command and stderr to help debug "
         "connection and download issues.",
     )
+    parser.add_argument(
+        "--no-refresh-token",
+        action="store_true",
+        help="Do not attempt to automatically refresh the OIDC token.",
+    )
     args = parser.parse_args()
 
     prefix = args.archive or os.environ.get(
@@ -77,11 +83,14 @@ def main_download():
                 desdata=desdata,
                 force=args.force,
                 debug=args.debug,
+                refresh_token=not args.no_refresh_token,
             )
         )
 
     if args.list is not None:
         with open(args.list) as fp:
+            # for a list of files we refresh once
+            did_refresh = False
             for line in fp:
                 line = line.strip()
                 download_file(
@@ -90,7 +99,9 @@ def main_download():
                     desdata=desdata,
                     force=args.force,
                     debug=args.debug,
+                    refresh_token=((not args.no_refresh_token) and (not did_refresh)),
                 )
+                did_refresh = True
 
 
 def main_download_metadata():
@@ -192,12 +203,36 @@ def main_make_token():
         "Any extra arguemnts are passed to `htgettoken`.",
     )
     args, unknown = parser.parse_known_args()
+    make_des_archive_access_dir(fix_permissions=True)
+
+    # we use a non-standard default location for the vault token
+    # if it does not stomp on user settings
+    if not any("--vaulttokenfile" in uk for uk in unknown):
+        unknown += [
+            "--vaulttokenfile="
+            + os.path.join(get_des_archive_access_dir(), "vault_token")
+        ]
     extra_args = " ".join(unknown)
 
-    make_des_archive_access_dir(fix_permissions=True)
-    tloc = os.path.join(get_des_archive_access_dir(), "token")
+    # the output token location and name of vault etc. is always set
+    tloc = os.path.join(get_des_archive_access_dir(), "bearer_token")
+    cmd = f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}"
+
+    # if the user wants verbose or debugging, we print the command
+    if (
+        (
+            "-v" in unknown
+            or "-d" in unknown
+            or "--debug" in unknown
+            or "--verbose" in unknown
+        )
+        and "-q" not in unknown
+        and "--quiet" not in unknown
+    ):
+        print("RUNNING COMMAND:", cmd, file=sys.stderr)
+
     subprocess.run(
-        f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}",
+        cmd,
         shell=True,
         check=True,
     )

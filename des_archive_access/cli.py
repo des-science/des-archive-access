@@ -215,7 +215,16 @@ def main_make_token():
     tloc = os.path.join(get_des_archive_access_dir(), "bearer_token")
     cmd = f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}"
 
-    if ("-v" in unknown or "-d" in unknown) and "-q" not in unknown:
+    if (
+        (
+            "-v" in unknown
+            or "-d" in unknown
+            or "--debug" in unknown
+            or "--verbose" in unknown
+        )
+        and "-q" not in unknown
+        and "--quiet" not in unknown
+    ):
         print("RUNNING COMMAND:", cmd, file=sys.stderr)
 
     subprocess.run(

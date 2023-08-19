@@ -61,7 +61,12 @@ Then you can use the `des-archive-access` command to interact with the metadata.
 $ des-archive-access --help
 Usage: des-archive-access [OPTIONS] COMMAND [ARGS]...
 
-  DES archive access CLI. Execute the CLI to start the SQL shell.
+  DES archive access CLI
+
+  Execute `des-archive-access` at the command line to run queries in an
+  interactive SQL shell.
+
+  Alternatively, use the options below to execute queries directly.
 
 Options:
   -l, --loadsql TEXT  Load a SQL command from a file and execute it.
@@ -69,7 +74,7 @@ Options:
   --help              Show this message and exit.
 
 Commands:
-  sql      Alternative way of loading a sql command from the QUERY...
+  sql      Execute a QUERY.
   sqlrepl  Alternative way of staring the SQL shell.
 $ des-archive-access -c "select band, tilename, ccdnum, filename from y6a2_image limit 10;"
 found 10 rows in 0.003719 seconds (2688.656410 rows/s)

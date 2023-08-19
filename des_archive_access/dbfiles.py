@@ -86,7 +86,7 @@ def download_file(
             print(r.stdout, file=sys.stderr)
             raise RuntimeError(
                 "OIDC token refresh failed!"
-                "Run 'des-archive-access-make-token' "
+                "Run 'des-archive-access-make-token -d' "
                 "at the command line to debug."
             )
 
@@ -101,7 +101,7 @@ def download_file(
     )
 
     if debug:
-        print(cmd, file=sys.stderr)
+        print("RUNNING COMMAND:", cmd, file=sys.stderr)
 
     res = subprocess.run(
         cmd,

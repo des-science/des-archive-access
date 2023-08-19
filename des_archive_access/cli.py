@@ -205,6 +205,8 @@ def main_make_token():
     args, unknown = parser.parse_known_args()
     make_des_archive_access_dir(fix_permissions=True)
 
+    # we use a non-standard default location for the vault token
+    # if it does not stomp on user settings
     if not any("--vaulttokenfile" in uk for uk in unknown):
         unknown += [
             "--vaulttokenfile="
@@ -212,9 +214,11 @@ def main_make_token():
         ]
     extra_args = " ".join(unknown)
 
+    # the output token location and name of vault etc. is always set
     tloc = os.path.join(get_des_archive_access_dir(), "bearer_token")
     cmd = f"htgettoken {extra_args} -a htvaultprod.fnal.gov -i des -o {tloc}"
 
+    # if the user wants verbose or debugging, we print the command
     if (
         (
             "-v" in unknown

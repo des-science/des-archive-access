@@ -79,10 +79,15 @@ def download_file(
                 shell=True,
                 check=True,
                 text=True,
+                # when debugging, we let all stdout/stderr through
+                # but put everything in stderr
+                # otherwise, we capture it all
                 stdout=sys.stderr if debug else subprocess.PIPE,
                 stderr=None if debug else subprocess.STDOUT,
             )
         except Exception:
+            # if we encounter an error, we print the captured
+            # output to stderr and raise a helpful message
             print(r.stdout, file=sys.stderr)
             raise RuntimeError(
                 "OIDC token refresh failed!"
@@ -108,7 +113,10 @@ def download_file(
         shell=True,
         check=True,
         cwd=desdata,
+        # we always capture stdout since the only thing that should be
+        # on stdout is the file path after the download
         stdout=subprocess.PIPE,
+        # if we are debugging, we let stderr through
         stderr=None if debug else subprocess.PIPE,
         text=True,
     )
@@ -118,6 +126,8 @@ def download_file(
         print(f"HTTP return code: {res.stdout}", file=sys.stderr)
 
     if http_code >= 400:
+        if res.stderr:
+            print(res.stderr, file=sys.stderr)
         err_str = f"Failed to download file with HTTP error code {http_code}!"
         if http_code == 401:
             err_str += (

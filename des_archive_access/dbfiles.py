@@ -80,7 +80,7 @@ def download_file(
                 check=True,
                 text=True,
                 stdout=sys.stderr if debug else subprocess.PIPE,
-                stderr=subprocess.STDOUT,
+                stderr=None if debug else subprocess.STDOUT,
             )
         except Exception:
             print(r.stdout, file=sys.stderr)

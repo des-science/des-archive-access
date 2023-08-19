@@ -44,7 +44,14 @@ def get_des_archive_access_db_conn():
     )
 
 
-def download_file(fname, prefix=None, desdata=None, force=False, debug=False):
+def download_file(
+    fname,
+    prefix=None,
+    desdata=None,
+    force=False,
+    debug=False,
+    refresh_token=True,
+):
     """Download a file FNAME from the DES FNAL archive
     possibly with an optional HTTPS `prefix` and optional `desdata` destination.
 
@@ -64,19 +71,58 @@ def download_file(fname, prefix=None, desdata=None, force=False, debug=False):
         except Exception:
             pass
 
-    cmd = ('curl -L -H "Authorization: Bearer $(<{})" -o {} -C - {}/{}').format(
+    if refresh_token:
+        try:
+            r = subprocess.run(
+                "des-archive-access-make-token",
+                shell=True,
+                check=True,
+                text=True,
+                stdout=sys.stderr if debug else subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+        except Exception:
+            print(r.stdout, file=sys.stderr)
+            raise RuntimeError(
+                "OIDC token refresh failed!"
+                "Run 'des-archive-access-make-token' "
+                "at the command line to debug."
+            )
+
+    cmd = (
+        'curl --write-out "%{{http_code}}" -L '
+        '-H "Authorization: Bearer $(<{})" -o {} -C - {}/{}'
+    ).format(
         os.path.join(get_des_archive_access_dir(), "token"),
         fpth,
         prefix,
         fname,
     )
+
     if debug:
         print(cmd, file=sys.stderr)
-    subprocess.run(
+
+    res = subprocess.run(
         cmd,
         shell=True,
         check=True,
         cwd=desdata,
+        stdout=subprocess.PIPE,
         stderr=None if debug else subprocess.PIPE,
+        text=True,
     )
+
+    http_code = int(res.stdout)
+    if debug:
+        print(f"HTTP return code: {res.stdout}", file=sys.stderr)
+
+    if http_code >= 400:
+        err_str = f"Failed to download file with HTTP error code {http_code}!"
+        if http_code == 401:
+            err_str += (
+                " Error code 401 indicates that need to refresh your token "
+                "by running 'des-archive-access-make-token' at the command line."
+            )
+        raise RuntimeError(err_str)
+
     return fpth

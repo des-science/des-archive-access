@@ -20,14 +20,15 @@ def main_download():
         prog="des-archive-access-download",
         description="Download files from the DES archive at FNAL.",
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "file",
         type=str,
         default=None,
         help="file to download",
         nargs="?",
     )
-    parser.add_argument(
+    group.add_argument(
         "-l",
         "--list",
         type=str,
@@ -60,6 +61,11 @@ def main_download():
         help="Print the 'curl' command and stderr to help debug "
         "connection and download issues.",
     )
+    parser.add_argument(
+        "--no-refresh-token",
+        action="store_true",
+        help="Do not attempt to automatically refresh the OIDC token.",
+    )
     args = parser.parse_args()
 
     prefix = args.archive or os.environ.get(
@@ -77,11 +83,14 @@ def main_download():
                 desdata=desdata,
                 force=args.force,
                 debug=args.debug,
+                refresh_token=not args.no_refresh_token,
             )
         )
 
     if args.list is not None:
         with open(args.list) as fp:
+            # for a list of files we refresh once
+            did_refresh = False
             for line in fp:
                 line = line.strip()
                 download_file(
@@ -90,7 +99,9 @@ def main_download():
                     desdata=desdata,
                     force=args.force,
                     debug=args.debug,
+                    refresh_token=((not args.no_refresh_token) and (not did_refresh)),
                 )
+                did_refresh = True
 
 
 def main_download_metadata():

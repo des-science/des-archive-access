@@ -50,7 +50,7 @@ Before you can query the file archive metadata, you need to download the metadat
 command. This command will put the data in your home area. If you'd like to specify a different path to the DB, set it via the environment variable `DES_ARCHIVE_ACCESS_DB` like this
 
 ```bash
-$ export DES_ARCHIVE_ACCESS_DB=/my/metadata.db
+export DES_ARCHIVE_ACCESS_DB=/my/metadata.db
 ```
 
 ### Querying the Archive Metadata
@@ -127,7 +127,7 @@ You can use the `des-archive-access-download` command to download files from the
 
 ```bash
 $ des-archive-access-download --help
-usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [--debug] [file]
+usage: des-archive-access-download [-h] [-l LIST] [-a ARCHIVE] [-d DESDATA] [-f] [--debug] [--no-refresh-token] [file]
 
 Download files from the DES archive at FNAL.
 
@@ -143,6 +143,7 @@ options:
                         The destination DESDATA directory.
   -f, --force           Force the download even if data already exists
   --debug               Print the 'curl' command and stderr to help debug connection and download issues.
+  --no-refresh-token    Do not attempt to automatically refresh the OIDC token.
 $ des-archive-access-download OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
 /Users/beckermr/DESDATA/OPS/finalcut/Y6A1/20181129-r4056/D00797980/p01/red/immask/D00797980_r_c27_r4056p01_immasked.fits.fz
 ```

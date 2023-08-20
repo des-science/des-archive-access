@@ -202,8 +202,22 @@ def main_make_token():
         description="Make the OIDC token for FNAL dCache. "
         "Any extra arguemnts are passed to `htgettoken`.",
     )
+    parser.add_argument("--remove", action="store_true", help="remove existing tokens")
     args, unknown = parser.parse_known_args()
     make_des_archive_access_dir(fix_permissions=True)
+
+    if args.remove:
+        for pth in [
+            os.path.join(get_des_archive_access_dir(), "vault_token"),
+            os.path.join(get_des_archive_access_dir(), "bearer_token"),
+        ]:
+            try:
+                os.remove(pth)
+            except Exception:
+                pass
+
+    if args.remove:
+        sys.exit(0)
 
     # we use a non-standard default location for the vault token
     # if it does not stomp on user settings

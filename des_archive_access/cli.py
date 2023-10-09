@@ -148,8 +148,8 @@ def main_download_metadata():
             "desdm-file-db-23-10-06-15-39/desdm_pruned_indexed_files.db.zst"
         )
 
-        if url.endswith(".zstd"):
-            dest = mloc + ".zstd"
+        if url.endswith(".zst"):
+            dest = mloc + ".zst"
         else:
             dest = mloc
 
@@ -173,12 +173,12 @@ def main_download_metadata():
                 if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
                     raise RuntimeError("Download failed!")
 
-                _source_path = mloc + ".zstd"
+                _source_path = dest
             else:
                 _source_path = url[len("file://") :]
 
             # decompress
-            if url.endswith(".zstd"):
+            if url.endswith(".zst"):
                 print("decompressing...", end="", flush=True)
                 dctx = zstandard.ZstdDecompressor()
                 with open(_source_path, "rb") as ifh, open(mloc, "wb") as ofh:
@@ -187,16 +187,16 @@ def main_download_metadata():
         except (KeyboardInterrupt, Exception) as e:
             try:
                 os.remove(mloc)
-                if url.endswith(".zstd"):
-                    os.remove(mloc + ".zstd")
+                if url.endswith(".zst"):
+                    os.remove(mloc + ".zst")
             except Exception:
                 pass
 
             raise e
         finally:
             try:
-                if url.startswith("http") and url.endswith(".zstd"):
-                    os.remove(mloc + ".zstd")
+                if url.startswith("http") and url.endswith(".zst"):
+                    os.remove(mloc + ".zst")
             except Exception:
                 pass
 

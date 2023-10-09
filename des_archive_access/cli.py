@@ -175,7 +175,7 @@ def main_download_metadata():
 
                 _source_path = mloc + ".zstd"
             else:
-                _source_path = url[len("file://"):]
+                _source_path = url[len("file://") :]
 
             # decompress
             if url.endswith(".zstd"):

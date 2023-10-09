@@ -145,7 +145,7 @@ def main_download_metadata():
 
         url = args.url or (
             "http://deslogin.cosmology.illinois.edu/~donaldp/"
-            "desdm-file-db-23-08-18-10-02/desdm-test.db.zst"
+            "desdm-file-db-23-10-06-15-39/desdm_pruned_indexed_files.db.zst"
         )
 
         if url.endswith(".zstd"):

@@ -154,29 +154,34 @@ def main_download_metadata():
             dest = mloc
 
         try:
-            # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
-            response = requests.get(url, stream=True)
-            total_size_in_bytes = int(response.headers.get("content-length", 0))
-            block_size = 1024
-            with tqdm(
-                total=total_size_in_bytes,
-                unit="iB",
-                unit_scale=True,
-                ncols=80,
-                desc="downloading DB",
-            ) as progress_bar:
-                with open(dest, "wb") as file:
-                    for data in response.iter_content(block_size):
-                        progress_bar.update(len(data))
-                        file.write(data)
-            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                raise RuntimeError("Download failed!")
+            if url.startswith("http"):
+                # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
+                response = requests.get(url, stream=True)
+                total_size_in_bytes = int(response.headers.get("content-length", 0))
+                block_size = 1024
+                with tqdm(
+                    total=total_size_in_bytes,
+                    unit="iB",
+                    unit_scale=True,
+                    ncols=80,
+                    desc="downloading DB",
+                ) as progress_bar:
+                    with open(dest, "wb") as file:
+                        for data in response.iter_content(block_size):
+                            progress_bar.update(len(data))
+                            file.write(data)
+                if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+                    raise RuntimeError("Download failed!")
+
+                _source_path = mloc + ".zstd"
+            else:
+                _source_path = url[len("file://"):]
 
             # decompress
             if url.endswith(".zstd"):
                 print("decompressing...", end="", flush=True)
                 dctx = zstandard.ZstdDecompressor()
-                with open(mloc + ".zstd", "rb") as ifh, open(mloc, "wb") as ofh:
+                with open(_source_path, "rb") as ifh, open(mloc, "wb") as ofh:
                     dctx.copy_stream(ifh, ofh)
                 print("done.", flush=True)
         except (KeyboardInterrupt, Exception) as e:
@@ -190,7 +195,7 @@ def main_download_metadata():
             raise e
         finally:
             try:
-                if url.endswith(".zstd"):
+                if url.startswith("http") and url.endswith(".zstd"):
                     os.remove(mloc + ".zstd")
             except Exception:
                 pass

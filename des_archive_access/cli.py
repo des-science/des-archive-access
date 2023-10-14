@@ -213,10 +213,11 @@ def main_make_token():
         "Any extra arguemnts are passed to `htgettoken`.",
     )
     parser.add_argument("--remove", action="store_true", help="remove existing tokens")
+    parser.add_argument("--force", action="store_true", help="forcibly remake tokens")
     args, unknown = parser.parse_known_args()
     make_des_archive_access_dir(fix_permissions=True)
 
-    if args.remove:
+    if args.remove or args.force:
         for pth in [
             os.path.join(get_des_archive_access_dir(), "vault_token"),
             os.path.join(get_des_archive_access_dir(), "bearer_token"),

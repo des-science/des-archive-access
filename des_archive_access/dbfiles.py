@@ -51,6 +51,7 @@ def download_file(
     force=False,
     debug=False,
     refresh_token=True,
+    extra_cli_args="",
 ):
     """Download a file FNAME from the DES FNAL archive
     possibly with an optional HTTPS `prefix` and optional `desdata` destination.
@@ -96,9 +97,10 @@ def download_file(
             )
 
     cmd = (
-        'curl --write-out "%{{http_code}}" -L '
+        'curl --write-out "%{{http_code}}" -L {} '
         '-H "Authorization: Bearer $(<{})" -o {} -C - {}/{}'
     ).format(
+        extra_cli_args,
         os.path.join(get_des_archive_access_dir(), "bearer_token"),
         fpth,
         prefix,
@@ -128,7 +130,10 @@ def download_file(
     if http_code >= 400:
         if res.stderr:
             print(res.stderr, file=sys.stderr)
-        err_str = f"Failed to download file with HTTP error code {http_code}!"
+        err_str = (
+            f"Failed to download file with HTTP error code {http_code}! "
+            "Trying the same command on with `--debug` may help you diagnose the error."
+        )
         if http_code == 401:
             err_str += (
                 " Error code 401 indicates that need to refresh your token "

@@ -18,7 +18,10 @@ from des_archive_access.dbfiles import (
 def main_download():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-download",
-        description="Download files from the DES archive at FNAL.",
+        description=(
+            "Download files from the DES archive at FNAL. "
+            "Any extra keyword arguemnts are passed to `curl`."
+        ),
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -66,7 +69,7 @@ def main_download():
         action="store_true",
         help="Do not attempt to automatically refresh the OIDC token.",
     )
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     prefix = args.archive or os.environ.get(
         "DES_ARCHIVE_ACCESS_ARCHIVE",
@@ -84,6 +87,7 @@ def main_download():
                 force=args.force,
                 debug=args.debug,
                 refresh_token=not args.no_refresh_token,
+                extra_cli_args=" ".join(unknown),
             )
         )
 
@@ -100,6 +104,7 @@ def main_download():
                     force=args.force,
                     debug=args.debug,
                     refresh_token=((not args.no_refresh_token) and (not did_refresh)),
+                    extra_cli_args=" ".join(unknown),
                 )
                 did_refresh = True
 
@@ -208,10 +213,11 @@ def main_make_token():
         "Any extra arguemnts are passed to `htgettoken`.",
     )
     parser.add_argument("--remove", action="store_true", help="remove existing tokens")
+    parser.add_argument("--force", action="store_true", help="forcibly remake tokens")
     args, unknown = parser.parse_known_args()
     make_des_archive_access_dir(fix_permissions=True)
 
-    if args.remove:
+    if args.remove or args.force:
         for pth in [
             os.path.join(get_des_archive_access_dir(), "vault_token"),
             os.path.join(get_des_archive_access_dir(), "bearer_token"),
@@ -255,3 +261,9 @@ def main_make_token():
         shell=True,
         check=True,
     )
+
+    for pth in [
+        os.path.join(get_des_archive_access_dir(), "vault_token"),
+        os.path.join(get_des_archive_access_dir(), "bearer_token"),
+    ]:
+        os.chmod(pth, 0o700)

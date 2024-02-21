@@ -142,3 +142,44 @@ def download_file(
         raise RuntimeError(err_str)
 
     return fpth
+
+
+def download_file_from_desdm(archive_path, source_dir):
+    """Given a path in the DESDM file archive and the destination directory,
+    download the file via rsync.
+
+    Parameters
+    ----------
+    archive_path : str
+        The file to download from the DESDM file archive (e.g.,
+        "OPS/cal/cat_tile_gaia/v1/DES0146-3623_GAIA_DR2_v1.fits").
+    source_dir : str
+        The location to download the file to. The file will be at
+        `source_dir`/`archive_path`.
+    """
+
+    if "DESREMOTE_RSYNC_USER" in os.environ:
+        user = os.environ["DESREMOTE_RSYNC_USER"] + "@"
+    else:
+        user = ""
+
+    final_dir = os.path.dirname(os.path.join(source_dir, archive_path))
+    os.makedirs(final_dir, exist_ok=True)
+
+    rsync_cmd = """\
+rsync \
+    -av \
+    --password-file ${DES_RSYNC_PASSFILE} \
+    %(user)s${DESREMOTE_RSYNC}/%(fname)s \
+    %(source_dir)s/%(fname)s
+""" % dict(
+        user=user,
+        fname=archive_path,
+        source_dir=source_dir,
+    )
+
+    subprocess.run(
+        rsync_cmd,
+        shell=True,
+        check=True,
+    )

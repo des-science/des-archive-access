@@ -21,6 +21,7 @@ readme = "README.md"
 des-archive-access-download = "des_archive_access.cli:main_download"
 des-archive-access-download-metadata = "des_archive_access.cli:main_download_metadata"
 des-archive-access-make-token = "des_archive_access.cli:main_make_token"
+des-archive-access-sync-tile-data = "des_archive_access.cli:main_sync_tile_data"
 des-archive-access = "des_archive_access.repl:cli"
 
 [project.urls]

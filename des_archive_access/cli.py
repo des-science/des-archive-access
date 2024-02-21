@@ -421,8 +421,8 @@ def download_archive_file(archive_path, source_dir):
         `source_dir`/`archive_path`.
     """
 
-    if 'DESREMOTE_RSYNC_USER' in os.environ:
-        user = os.environ['DESREMOTE_RSYNC_USER'] + '@'
+    if "DESREMOTE_RSYNC_USER" in os.environ:
+        user = os.environ["DESREMOTE_RSYNC_USER"] + "@"
     else:
         user = ""
 
@@ -451,16 +451,16 @@ rsync \
 def main_sync_tile_data():
     parser = argparse.ArgumentParser(
         prog="des-archive-access-sync-tile-data",
-        description="Sync all data for a given coadd tile from NCSA to FNAL."
+        description="Sync all data for a given coadd tile from NCSA to FNAL.",
     )
     parser.add_argument(
-        '--tilename',
+        "--tilename",
         required=True,
-        help='tile to process',
+        help="tile to process",
     )
     parser.add_argument(
-        '--band',
-        help='band to process',
+        "--band",
+        help="band to process",
         required=True,
     )
     parser.add_argument(
@@ -480,8 +480,8 @@ def main_sync_tile_data():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # make the config file
-        config_path = os.path.join(tmpdir, 'pizza_cutter_config.yaml')
-        with open(config_path, 'w') as config_file:
+        config_path = os.path.join(tmpdir, "pizza_cutter_config.yaml")
+        with open(config_path, "w") as config_file:
             config_file.write(PIZZA_CUTTER_CONFIG)
 
         meds_dir = os.path.join(tmpdir, "MEDS_DIR")
@@ -521,8 +521,9 @@ def main_sync_tile_data():
         ("Y6A2_MEDS_V3", True),
     ]
     import easyaccess as ea
+
     try:
-        conn = ea.connect(section='desoper')
+        conn = ea.connect(section="desoper")
         curs = conn.cursor()
         for tag, per_band in tags_to_query:
             sql = f"""\

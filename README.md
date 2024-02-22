@@ -159,3 +159,31 @@ You must set the `DESDATA` environment variable. Files will be downloaded to thi
 
 - `des-archive-access` currently only supports writing SQL queries in FITS binary format and in only a single file.
 - All of the `easyaccess` features for introspecting tables and columns are not yet implemented.
+
+## Syncing Data for a Coadd Tile from NCSA to FNAL
+
+You can use the `des-archive-access-sync-tile-data` command to sync data from NCSA to FNAL. This command downloads all of the relevant Y6 data for a given coadd tile and band to a local `DESDATA` directory.
+
+```bash
+$ des-archive-access-sync-tile-data --help
+usage: des-archive-access-sync-tile-data [-h] --tilename TILENAME --band BAND [-d DESDATA]
+
+Sync all data for a given coadd tile from NCSA to FNAL.
+
+options:
+  -h, --help            show this help message and exit
+  --tilename TILENAME   tile to process
+  --band BAND           band to process
+  -d DESDATA, --desdata DESDATA
+                        The destination DESDATA directory.
+$ des-archive-access-sync-tile-data --tilename DES2041-5248 --band r
+```
+
+To move data into dcache at FNAL, you need to first setup your local certificate / voms proxy. Then you can use the following commands
+
+```bash
+$ cd ${DESDATA}
+$ ifdh cp -r OPS_Taiga ${PNFS_DES}/DESDM_ARCHIVE/OPS_Taiga
+```
+
+where `PNFS_DES` is the path to the DES dcache persistent disk storage.
